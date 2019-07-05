@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Checkpoint02
 {
@@ -7,6 +8,7 @@ namespace Checkpoint02
     {
         static void Main(string[] args)
         {
+
             while (true)
             {
                 try
@@ -22,9 +24,9 @@ namespace Checkpoint02
                     Console.WriteLine(ex.Message);
                     Console.ResetColor();
                 }
-                
+
             }
-            
+
         }
 
         private static List<Room> BuildRoomsList()
@@ -39,16 +41,26 @@ namespace Checkpoint02
 
             string[] allRooms = input.Split('|');
 
+            
+
             foreach (string room in allRooms)
             {
+                if (ValidInput(room) == false)
+                    throw new ArgumentException("invalid input"); 
+
                 var newRoom = new Room();
                 string[] oneRoom = room.Trim().Split(' ');
 
                 newRoom.Name = oneRoom[0];
 
-                if (int.TryParse(oneRoom[1].Remove(oneRoom[1].Length - 2, 2), out int size))
+                string[] m2Split = oneRoom[1].Split('m');
+
+                if (int.TryParse(m2Split[0], out int size))
                     newRoom.SizeInM2 = size;
                 else
+                    throw new ArgumentException("invalid input");
+
+                if (size <= 0)
                     throw new ArgumentException("invalid input");
 
                 if (oneRoom[2].ToLower() == "on")
@@ -62,6 +74,13 @@ namespace Checkpoint02
             }
 
             return listOfRooms;
+        }
+
+        private static bool ValidInput(string room)
+        {
+
+            return Regex.IsMatch(room.Trim(), @"^[a-zåäö]* [1-9]{1}[0-9]?m2 (on|off)$", RegexOptions.IgnoreCase);
+
         }
 
         private static void DisplayRooms(List<Room> roomsFromUser)
@@ -103,6 +122,7 @@ namespace Checkpoint02
                 else if (roomsFromUser[i].SizeInM2 > largestRoom.SizeInM2)
                     largestRoom = roomsFromUser[i];
             }
+
             Console.WriteLine($"Det största rummet är {largestRoom.Name}, på {largestRoom.SizeInM2}m2");
             Console.WriteLine($"Lägenheten består av {roomsFromUser.Count} rum");
             Console.ResetColor();
